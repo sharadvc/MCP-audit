@@ -26,6 +26,22 @@ export const DEFAULT_CONFIG: McpAuditConfig = {
   ignore: [],
 };
 
+const KNOWN_CONFIG_KEYS = new Set<string>([
+  "disabledRules",
+  "enabledRules",
+  "severityOverrides",
+  "failOn",
+  "ignore",
+]);
+
+function assertKnownConfigKeys(obj: Record<string, unknown>): void {
+  for (const key of Object.keys(obj)) {
+    if (!KNOWN_CONFIG_KEYS.has(key)) {
+      throw new Error(`Unknown config key "${key}".`);
+    }
+  }
+}
+
 const CONFIG_FILENAMES = [
   ".mcpauditrc",
   ".mcpauditrc.json",
@@ -62,6 +78,7 @@ export function normalizeConfig(
   base: McpAuditConfig = DEFAULT_CONFIG,
 ): McpAuditConfig {
   const obj = (raw ?? {}) as Record<string, unknown>;
+  assertKnownConfigKeys(obj);
   const config: McpAuditConfig = {
     disabledRules: [...base.disabledRules],
     enabledRules: [...base.enabledRules],

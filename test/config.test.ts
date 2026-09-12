@@ -24,6 +24,12 @@ describe("normalizeConfig", () => {
     expect(config.severityOverrides.MCP021).toBe("high");
   });
 
+  it("rejects unknown top-level config keys", () => {
+    expect(() =>
+      normalizeConfig({ disabledRule: ["MCP001"] }),
+    ).toThrow(/disabledRule/);
+  });
+
   it("rejects an invalid failOn severity", () => {
     expect(() => normalizeConfig({ failOn: "catastrophic" })).toThrow(
       /Invalid severity/,
