@@ -38,9 +38,11 @@ export function runAudit(
   rules: Rule[] = ALL_RULES,
 ): AuditResult {
   const engine = new Engine(rules);
+  const useAllowlist =
+    config.enforceEnabledRules || config.enabledRules.length > 0;
   const raw = engine.run(target, {
     disabledRules: config.disabledRules,
-    enabledRules: config.enabledRules,
+    enabledRules: useAllowlist ? config.enabledRules : undefined,
     severityOverrides: config.severityOverrides,
   });
   const findings = applyIgnores(raw.findings, config.ignore);

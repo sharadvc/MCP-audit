@@ -41,7 +41,7 @@ export class Engine {
   activeRules(options: EngineOptions = {}): Rule[] {
     const { disabledRules = [], enabledRules } = options;
     return this.rules.filter((rule) => {
-      if (enabledRules && enabledRules.length > 0) {
+      if (enabledRules !== undefined) {
         return enabledRules.includes(rule.id);
       }
       return !disabledRules.includes(rule.id);

@@ -40,6 +40,13 @@ describe("Engine", () => {
     expect(result.findings.map((f) => f.ruleId)).toEqual(["A"]);
   });
 
+  it("runs no rules when enabledRules is an empty allowlist", () => {
+    const engine = new Engine([rule("A", "low"), rule("B", "high")]);
+    const result = engine.run(makeTarget(), { enabledRules: [] });
+    expect(result.rulesRun).toEqual([]);
+    expect(result.findings).toEqual([]);
+  });
+
   it("applies severity overrides", () => {
     const engine = new Engine([rule("A", "low")]);
     const result = engine.run(makeTarget(), {

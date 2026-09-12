@@ -1,5 +1,8 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import { collectHeaders, main, parseArgs } from "../src/cli.js";
+import { collectHeaders, main, overlayFlags, parseArgs } from "../src/cli.js";
+import { DEFAULT_CONFIG } from "../src/config.js";
+import { runAudit } from "../src/audit.js";
+import { makeTarget } from "./helpers.js";
 
 afterEach(() => {
   vi.restoreAllMocks();
@@ -56,6 +59,13 @@ describe("HTTP headers", () => {
     ]);
 
     expect(collectHeaders(flags)).toEqual({ Authorization: "Bearer a:b" });
+  });
+
+  it("treats --only \"\" as an empty allowlist (zero rules run)", () => {
+    const { flags } = parseArgs(["static", "manifest.json", "--only", ""]);
+    const config = overlayFlags(DEFAULT_CONFIG, flags);
+    const result = runAudit(makeTarget(), config);
+    expect(result.rulesRun).toEqual([]);
   });
 
   it("keeps last-wins behavior for repeated non-header flags", () => {

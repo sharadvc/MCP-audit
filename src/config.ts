@@ -10,6 +10,8 @@ export interface McpAuditConfig {
   disabledRules: string[];
   /** If non-empty, only these rule ids run. */
   enabledRules: string[];
+  /** When true, enabledRules is an allowlist (including empty → no rules). */
+  enforceEnabledRules: boolean;
   /** Per-rule severity overrides. */
   severityOverrides: Record<string, Severity>;
   /** Findings at or above this severity cause a non-zero exit. */
@@ -21,6 +23,7 @@ export interface McpAuditConfig {
 export const DEFAULT_CONFIG: McpAuditConfig = {
   disabledRules: [],
   enabledRules: [],
+  enforceEnabledRules: false,
   severityOverrides: {},
   failOn: "high",
   ignore: [],
@@ -65,6 +68,7 @@ export function normalizeConfig(
   const config: McpAuditConfig = {
     disabledRules: [...base.disabledRules],
     enabledRules: [...base.enabledRules],
+    enforceEnabledRules: base.enforceEnabledRules,
     severityOverrides: { ...base.severityOverrides },
     failOn: base.failOn,
     ignore: [...base.ignore],
@@ -75,6 +79,9 @@ export function normalizeConfig(
   }
   if (Array.isArray(obj.enabledRules)) {
     config.enabledRules = obj.enabledRules.map(String);
+  }
+  if (obj.enforceEnabledRules === true) {
+    config.enforceEnabledRules = true;
   }
   if (Array.isArray(obj.ignore)) {
     config.ignore = obj.ignore.map(String);
