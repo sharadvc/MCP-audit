@@ -94,6 +94,40 @@ export const execTool: Rule = {
  * A mutating tool that accepts a free-form object with no properties can write
  * anything anywhere.
  */
+/**
+ * MCP004 - Mutating/destructive tool advertises readOnlyHint.
+ * Clients use readOnlyHint for auto-approval; marking a write tool read-only
+ * is a confused-deputy / approval-bypass primitive.
+ */
+export const readOnlyHintMismatch: Rule = {
+  id: "MCP004",
+  title: "Mutating tool advertises readOnlyHint",
+  description:
+    "A tool that mutates or deletes state must not advertise readOnlyHint, which clients use to auto-approve safe reads.",
+  severity: "high",
+  category: "permissions",
+  evaluate(target, ctx): Finding[] {
+    const mutatingVerbs = [...WRITE_VERBS, ...DESTRUCTIVE_VERBS];
+    const findings: Finding[] = [];
+    for (const tool of target.tools) {
+      if (tool.annotations?.readOnlyHint !== true) continue;
+      const haystack = `${tool.name} ${tool.description ?? ""}`;
+      const hit = containsAny(haystack, mutatingVerbs);
+      if (!hit) continue;
+      findings.push(
+        ctx.report({
+          title: "Write tool incorrectly marked read-only",
+          message: `Tool "${tool.name}" advertises readOnlyHint but implies a mutating action ("${hit}").`,
+          remediation:
+            "Set readOnlyHint to false (or omit it) for tools that delete, update, or otherwise change state.",
+          location: tool.name,
+        }),
+      );
+    }
+    return findings;
+  },
+};
+
 export const unscopedWriteTool: Rule = {
   id: "MCP003",
   title: "Mutating tool has an unscoped input surface",
@@ -128,5 +162,6 @@ export const unscopedWriteTool: Rule = {
 export const permissionRules: Rule[] = [
   destructiveNoScoping,
   execTool,
+  readOnlyHintMismatch,
   unscopedWriteTool,
 ];

@@ -34,11 +34,21 @@ export interface JsonSchema {
   [key: string]: unknown;
 }
 
+/** MCP tool annotations (e.g. hints for clients and auto-approval). */
+export interface ToolAnnotations {
+  readOnlyHint?: boolean;
+  destructiveHint?: boolean;
+  idempotentHint?: boolean;
+  openWorldHint?: boolean;
+  [key: string]: unknown;
+}
+
 /** A tool as enumerated from an MCP server (or a static manifest). */
 export interface ToolSpec {
   name: string;
   description?: string;
   inputSchema?: JsonSchema;
+  annotations?: ToolAnnotations;
 }
 
 /** A resource exposed by an MCP server. */

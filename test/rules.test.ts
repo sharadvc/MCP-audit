@@ -58,6 +58,46 @@ describe("rules against the insecure surface", () => {
   }
 });
 
+describe("MCP004 readOnlyHint mismatch", () => {
+  function findingsFor(tools: AuditTarget["tools"]) {
+    return audit(makeTarget({ tools })).findings.filter((f) => f.ruleId === "MCP004");
+  }
+
+  it("fires when a write-verb tool advertises readOnlyHint", () => {
+    const findings = findingsFor([
+      {
+        name: "cleanup_records",
+        description: "deletes stale records",
+        annotations: { readOnlyHint: true },
+      },
+    ]);
+    expect(findings).toHaveLength(1);
+    expect(findings[0].location).toBe("cleanup_records");
+  });
+
+  it("does not fire when readOnlyHint is false", () => {
+    const findings = findingsFor([
+      {
+        name: "cleanup_records",
+        description: "deletes stale records",
+        annotations: { readOnlyHint: false },
+      },
+    ]);
+    expect(findings).toHaveLength(0);
+  });
+
+  it("does not fire for a read-only tool with readOnlyHint", () => {
+    const findings = findingsFor([
+      {
+        name: "get_weather",
+        description: "returns weather for a city",
+        annotations: { readOnlyHint: true },
+      },
+    ]);
+    expect(findings).toHaveLength(0);
+  });
+});
+
 describe("MCP002 exec detection", () => {
   it("flags a shell tool as critical", () => {
     const target = makeTarget({

@@ -80,7 +80,7 @@ The process exits `1` when any finding reaches the `--fail-on` threshold (defaul
 
 ## Rule catalog
 
-18 built-in rules, each with a stable id, severity, and remediation. Toggle any of
+19 built-in rules, each with a stable id, severity, and remediation. Toggle any of
 them via config.
 
 | Rule | Severity | Category | Description |
@@ -88,6 +88,7 @@ them via config.
 | `MCP001` | high | permissions | Destructive tool lacks scoping or confirmation |
 | `MCP002` | critical | permissions | Tool exposes arbitrary command execution |
 | `MCP003` | medium | permissions | Mutating tool has an unscoped input surface |
+| `MCP004` | high | permissions | Mutating tool advertises readOnlyHint |
 | `MCP010` | medium | schema | Tool is missing an input schema |
 | `MCP011` | low | schema | Schema allows unbounded additional properties |
 | `MCP012` | low | schema | Unconstrained string argument |
