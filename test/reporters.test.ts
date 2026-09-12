@@ -20,7 +20,7 @@ describe("json reporter", () => {
     expect(doc.tool).toBe("mcp-audit");
     expect(doc.findings.length).toBe(result.findings.length);
     expect(doc.summary.critical).toBeGreaterThan(0);
-    expect(doc.target.counts.tools).toBe(6);
+    expect(doc.target.counts.tools).toBe(7);
   });
 });
 

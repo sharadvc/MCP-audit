@@ -29,7 +29,7 @@ describe("live stdio audit", () => {
     });
     expect(target.transport).toBe("stdio");
     expect(target.serverInfo.name).toBe("insecure-demo-server");
-    expect(target.tools.length).toBe(6);
+    expect(target.tools.length).toBe(7);
     expect(target.resources.length).toBe(2);
 
     const result = runAudit(target, DEFAULT_CONFIG, ALL_RULES);

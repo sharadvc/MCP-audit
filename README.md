@@ -94,6 +94,7 @@ them via config.
 | `MCP013` | info | schema | Object schema has no required properties |
 | `MCP020` | high | injection | Description contains probable prompt-injection text |
 | `MCP021` | medium | injection | Tool advertises overly broad capability |
+| `MCP022` | medium | injection | Description directs cross-tool chaining |
 | `MCP030` | critical | secrets | Resource exposes secrets or sensitive paths |
 | `MCP031` | high | secrets | Path argument is vulnerable to traversal |
 | `MCP040` | high | transport | HTTP transport has no authentication |

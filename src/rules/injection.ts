@@ -1,6 +1,18 @@
 import type { Finding, Rule } from "../types.js";
 import { containsAny, INJECTION_PHRASES } from "./helpers.js";
 
+/** Regexes for descriptions that direct the model to chain into other tools. */
+const CHAINING_DIRECTIVE_PATTERNS: RegExp[] = [
+  /\bthen\s+(call|invoke|use)\b/i,
+  /\buse your (other|available) tools\b/i,
+  /\bnext,\s*(run|call)\s+\w+/i,
+];
+
+function findChainingDirective(text?: string): RegExp | undefined {
+  if (!text) return undefined;
+  return CHAINING_DIRECTIVE_PATTERNS.find((re) => re.test(text));
+}
+
 const VAGUE_TERMS = [
   "anything",
   "any file",
@@ -79,7 +91,42 @@ export const overlyBroadDescription: Rule = {
   },
 };
 
+/**
+ * MCP022 - Cross-tool chaining directives in descriptions. Attackers embed
+ * instructions such as "then call send_email" to hijack multi-step planning.
+ */
+export const crossToolChainingDirective: Rule = {
+  id: "MCP022",
+  title: "Description directs cross-tool chaining",
+  description:
+    "Tool descriptions that tell the model to invoke other tools can smuggle tool-shadowing attacks.",
+  severity: "medium",
+  category: "injection",
+  evaluate(target, ctx): Finding[] {
+    const findings: Finding[] = [];
+    const scan = (label: string, name: string, text?: string) => {
+      const hit = findChainingDirective(text);
+      if (hit) {
+        findings.push(
+          ctx.report({
+            title: "Cross-tool chaining directive in description",
+            message: `${label} "${name}" description matches a cross-tool chaining pattern (${hit}). Descriptions should document this tool only, not orchestrate other tools.`,
+            remediation:
+              "Remove orchestration language from the description. Document each tool in isolation; let the host or user drive multi-tool workflows.",
+            location: name,
+          }),
+        );
+      }
+    };
+    for (const tool of target.tools) scan("Tool", tool.name, tool.description);
+    for (const prompt of target.prompts)
+      scan("Prompt", prompt.name, prompt.description);
+    return findings;
+  },
+};
+
 export const injectionRules: Rule[] = [
   injectionInDescription,
   overlyBroadDescription,
+  crossToolChainingDirective,
 ];
