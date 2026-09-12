@@ -1,7 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { normalizeConfig, loadConfig, DEFAULT_CONFIG } from "../src/config.js";
-import { writeFile, rm } from "node:fs/promises";
-import { join } from "node:path";
+import { writeFile, rm, mkdir } from "node:fs/promises";
+import { join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 
 describe("normalizeConfig", () => {
@@ -45,16 +45,22 @@ describe("normalizeConfig", () => {
 });
 
 describe("loadConfig", () => {
-  it("wraps JSON syntax errors with the file path", async () => {
-    const tmpFile = join(tmpdir(), `mcp-audit-test-${Math.random()}.json`);
-    await writeFile(tmpFile, "{ invalid json ", "utf8");
+  it("wraps JSON syntax errors with the resolved file path", async () => {
+    const dir = join(tmpdir(), `mcp-audit-test-${Math.random()}`);
+    await mkdir(dir);
+    const relativePath = "broken.json";
+    const absolutePath = resolve(dir, relativePath);
+    await writeFile(absolutePath, "{ invalid json ", "utf8");
+    const previousCwd = process.cwd();
     try {
-      await loadConfig({ explicitPath: tmpFile });
+      process.chdir(dir);
+      await loadConfig({ explicitPath: relativePath });
       expect.fail("Should have thrown");
     } catch (err) {
-      expect((err as Error).message).toContain(tmpFile);
+      expect((err as Error).message).toContain(absolutePath);
     } finally {
-      await rm(tmpFile, { force: true });
+      process.chdir(previousCwd);
+      await rm(dir, { recursive: true, force: true });
     }
   });
 });

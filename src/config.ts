@@ -102,12 +102,17 @@ export async function loadConfig(options: {
   const path =
     options.explicitPath ?? findConfigFile(options.cwd ?? process.cwd());
   if (!path) return { config: DEFAULT_CONFIG };
-  const raw = await readFile(resolve(path), "utf8");
+  const absolute = resolve(path);
+  const raw = await readFile(absolute, "utf8");
   let parsed: unknown;
   try {
     parsed = JSON.parse(raw);
   } catch (err) {
-    throw new Error(`Failed to parse config file ${path}: ${(err as Error).message}`);
+    throw new Error(
+      `Failed to parse config file ${absolute}: ${
+        err instanceof Error ? err.message : String(err)
+      }`,
+    );
   }
   return { config: normalizeConfig(parsed), path };
 }
