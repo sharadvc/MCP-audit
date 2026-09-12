@@ -36,6 +36,12 @@ describe("loadManifest", () => {
     expect(target.transport).toBe("static");
   });
 
+  it("rejects a manifest with non-array tools", () => {
+    expect(() => normalize({ tools: "MCP001" }, "bad.json")).toThrow(
+      /tools must be an array/i,
+    );
+  });
+
   it("rejects a missing manifest file", async () => {
     await expect(loadManifest(resolve(root, "does-not-exist.json"))).rejects.toBeTruthy();
   });
