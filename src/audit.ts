@@ -4,7 +4,7 @@ import { ALL_RULES } from "./rules/index.js";
 import type { AuditTarget, Finding, Rule, Severity } from "./types.js";
 import type { McpAuditConfig } from "./config.js";
 
-/** Remove findings whose location matches any ignore substring. */
+/** Remove findings whose location or rule id matches any ignore substring. */
 export function applyIgnores(
   findings: Finding[],
   ignore: string[],
@@ -12,7 +12,10 @@ export function applyIgnores(
   if (ignore.length === 0) return findings;
   return findings.filter((f) => {
     const loc = f.location ?? "";
-    return !ignore.some((pattern) => loc.includes(pattern));
+    const id = f.ruleId;
+    return !ignore.some(
+      (pattern) => loc.includes(pattern) || id.includes(pattern),
+    );
   });
 }
 

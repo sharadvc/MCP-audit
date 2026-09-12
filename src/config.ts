@@ -14,7 +14,7 @@ export interface McpAuditConfig {
   severityOverrides: Record<string, Severity>;
   /** Findings at or above this severity cause a non-zero exit. */
   failOn: Severity;
-  /** Location globs/substrings to ignore in findings. */
+  /** Location or rule-id substrings to ignore in findings. */
   ignore: string[];
 }
 

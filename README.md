@@ -126,7 +126,7 @@ mcp-audit discovers the nearest one walking up from the working directory.
 | `disabledRules` | Rule ids to skip entirely. |
 | `enabledRules` | If set, run **only** these rule ids. |
 | `severityOverrides` | Remap a rule's severity, e.g. downgrade a noisy check. |
-| `ignore` | Substrings matched against a finding's location to suppress it. |
+| `ignore` | Substrings matched against a finding's location or rule id to suppress it. |
 
 Severities, lowest to highest: `info`, `low`, `medium`, `high`, `critical`.
 
