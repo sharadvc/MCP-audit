@@ -120,7 +120,12 @@ export function collectHeaders(
   for (const v of values) {
     if (typeof v !== "string") continue;
     const idx = v.indexOf(":");
-    if (idx > 0) headers[v.slice(0, idx).trim()] = v.slice(idx + 1).trim();
+    if (idx <= 0) {
+      throw new Error(
+        `Invalid --header "${v}"; expected "Name: value" with a colon separator.`,
+      );
+    }
+    headers[v.slice(0, idx).trim()] = v.slice(idx + 1).trim();
   }
   return headers;
 }

@@ -58,6 +58,19 @@ describe("HTTP headers", () => {
     expect(collectHeaders(flags)).toEqual({ Authorization: "Bearer a:b" });
   });
 
+  it("rejects a header value without a colon", () => {
+    const { flags } = parseArgs([
+      "http",
+      "https://example.com/mcp",
+      "--header",
+      "Authorization",
+    ]);
+
+    expect(() => collectHeaders(flags)).toThrow(
+      /header.*colon/i,
+    );
+  });
+
   it("keeps last-wins behavior for repeated non-header flags", () => {
     const { flags } = parseArgs([
       "http",
