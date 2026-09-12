@@ -30,6 +30,13 @@ describe("top-level information flags", () => {
   });
 });
 
+describe("parseArgs", () => {
+  it("parses --flag=value as a string flag value", () => {
+    const { flags } = parseArgs(["audit", "--fail-on=high"]);
+    expect(flags["fail-on"]).toBe("high");
+  });
+});
+
 describe("HTTP headers", () => {
   it("collects every repeated --header flag", () => {
     const { flags } = parseArgs([

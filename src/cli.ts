@@ -28,9 +28,26 @@ export function parseArgs(argv: string[]): CliArgs {
   for (let i = 0; i < argv.length; i++) {
     const arg = argv[i];
     if (arg.startsWith("--")) {
-      const key = arg.slice(2);
+      let key = arg.slice(2);
+      let inlineValue: string | undefined;
+      const eq = key.indexOf("=");
+      if (eq !== -1) {
+        inlineValue = key.slice(eq + 1);
+        key = key.slice(0, eq);
+      }
       const next = argv[i + 1];
-      if (next !== undefined && !next.startsWith("--")) {
+      if (inlineValue !== undefined) {
+        if (key === "header" && flags[key] !== undefined) {
+          const previous = flags[key];
+          flags[key] = Array.isArray(previous)
+            ? [...previous, inlineValue]
+            : typeof previous === "string"
+              ? [previous, inlineValue]
+              : inlineValue;
+        } else {
+          flags[key] = inlineValue;
+        }
+      } else if (next !== undefined && !next.startsWith("--")) {
         if (key === "header" && flags[key] !== undefined) {
           const previous = flags[key];
           flags[key] = Array.isArray(previous)
