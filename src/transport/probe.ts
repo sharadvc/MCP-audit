@@ -34,18 +34,15 @@ export async function probe(
     const version = client.getServerVersion();
     const instructions = client.getInstructions();
 
-    const tools = await safeList(async () => {
-      const res = await client.listTools();
-      return res.tools as ToolSpec[];
-    });
-    const resources = await safeList(async () => {
-      const res = await client.listResources();
-      return res.resources as ResourceSpec[];
-    });
-    const prompts = await safeList(async () => {
-      const res = await client.listPrompts();
-      return res.prompts as PromptSpec[];
-    });
+    const tools = await safeList(async () =>
+      (await listAllPages(client.listTools.bind(client))) as ToolSpec[],
+    );
+    const resources = await safeList(async () =>
+      (await listAllPages(client.listResources.bind(client))) as ResourceSpec[],
+    );
+    const prompts = await safeList(async () =>
+      (await listAllPages(client.listPrompts.bind(client))) as PromptSpec[],
+    );
 
     return {
       transport: meta.kind,
@@ -63,6 +60,31 @@ export async function probe(
   } finally {
     await client.close().catch(() => undefined);
   }
+}
+
+type PaginatedListResult<T> = {
+  tools?: T[];
+  resources?: T[];
+  prompts?: T[];
+  nextCursor?: string;
+};
+
+/**
+ * Follow {@link nextCursor} until all pages of a list capability are loaded.
+ */
+async function listAllPages<T>(
+  listPage: (params?: { cursor?: string }) => Promise<PaginatedListResult<T>>,
+): Promise<T[]> {
+  const items: T[] = [];
+  let cursor: string | undefined;
+  do {
+    const res = await listPage(cursor ? { cursor } : undefined);
+    const page =
+      res.tools ?? res.resources ?? res.prompts ?? ([] as T[]);
+    items.push(...page);
+    cursor = res.nextCursor;
+  } while (cursor);
+  return items;
 }
 
 /**
